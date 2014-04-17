@@ -57,6 +57,12 @@ public class CreateTaskActivity extends Activity {
             startActivityForResult(cameraIntent, REQUEST_TAKE_PHOTO); 
 			return true;
 		}
+		if (id == R.id.action_attach) 
+		{
+			Intent intent = new Intent(this, FilePicker.class);
+	    	startActivity(intent);
+			return true;
+		}
 		return super.onOptionsItemSelected(item);
 	}
 

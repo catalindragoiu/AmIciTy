@@ -6,6 +6,11 @@
           android:title="@string/Camera"
           android:showAsAction="ifRoom" />
     
+    <item android:id="@+id/action_attach"
+          android:icon="@drawable/ic_action_attachment"
+          android:title="@string/Attach"
+          android:showAsAction="ifRoom" />
+    
      <item android:id="@+id/action_accept"
           android:icon="@drawable/ic_action_accept"
           android:title="@string/Accept"
