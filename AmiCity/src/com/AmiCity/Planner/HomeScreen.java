@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.ActionBar;
 import android.app.Fragment;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -11,11 +12,12 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.os.Build;
 
 public class HomeScreen extends Activity 
 {
-
+	private static final int REQUEST_NEW_TASK = 654;
     @Override
     protected void onCreate(Bundle savedInstanceState) 
     {
@@ -79,7 +81,15 @@ public class HomeScreen extends Activity
     public void StartNewTaskActivity()
     {
     	Intent intent = new Intent(this, CreateTaskActivity.class);
-    	startActivity(intent);
+    	startActivityForResult(intent,REQUEST_NEW_TASK);
     }
+    
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) 
+	{  
+        if (requestCode == REQUEST_NEW_TASK && resultCode == RESULT_OK) 
+        {  
+            
+        }
+    } 
 
 }

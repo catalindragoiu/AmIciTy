@@ -9,6 +9,7 @@ import android.app.Activity;
 import android.app.ActionBar;
 import android.app.Fragment;
 import android.app.ListActivity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.LayoutInflater;
@@ -56,6 +57,10 @@ public class FilePicker extends Activity {
 						else
 						{
 							//TODO: Select file
+							Intent databackIntent = new Intent(); 
+							databackIntent.putExtra("file_name", o.getPath()); 
+							setResult(Activity.RESULT_OK, databackIntent);
+							finish();
 						}
 					}
 				});

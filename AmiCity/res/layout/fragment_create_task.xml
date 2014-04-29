@@ -23,10 +23,18 @@
         android:id="@+id/ImgContainer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/TaskDetails"
-        android:layout_alignRight="@+id/TaskDetails"
         android:layout_below="@+id/TaskDetails"
-        android:layout_marginTop="47dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="140dp"
         android:src="@drawable/ic_action_camera" />
+
+    <TextView
+        android:id="@+id/AttachedFile"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/TaskDetails"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="37dp"
+        android:ems="10" />
 
 </RelativeLayout>
