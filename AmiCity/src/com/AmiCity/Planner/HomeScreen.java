@@ -1,5 +1,9 @@
 package com.AmiCity.Planner;
 
+import java.util.ArrayList;
+
+import com.google.gson.Gson;
+
 import android.app.Activity;
 import android.app.ActionBar;
 import android.app.Fragment;
@@ -12,15 +16,19 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.os.Build;
 
 public class HomeScreen extends Activity 
 {
 	private static final int REQUEST_NEW_TASK = 654;
+	ArrayList<Task> m_tasks;
+	private TasksArrayAdapter taskAdapter;
     @Override
     protected void onCreate(Bundle savedInstanceState) 
     {
+    	m_tasks = new ArrayList<Task>();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_screen);
 
@@ -40,6 +48,11 @@ public class HomeScreen extends Activity
     	MenuInflater inflater = getMenuInflater();
     	inflater.inflate(R.menu.home_screen, menu);
         inflater.inflate(R.menu.action_bar_menu, menu);
+        
+		final ListView listView1 = (ListView)findViewById(R.id.TaskList);
+		listView1.setClickable(true);
+		taskAdapter = new TasksArrayAdapter(this,R.layout.file_view,m_tasks);
+        listView1.setAdapter(taskAdapter);
         return true;
     }
 
@@ -88,7 +101,14 @@ public class HomeScreen extends Activity
 	{  
         if (requestCode == REQUEST_NEW_TASK && resultCode == RESULT_OK) 
         {  
-            
+        	String serializedTask = (String)data.getExtras().get("new_task");
+        	Gson gson = new Gson();
+        	Task newTask = gson.fromJson(serializedTask, Task.class);
+        	m_tasks.add(newTask);
+        	taskAdapter = new TasksArrayAdapter(this,R.layout.file_view,m_tasks);
+        	
+        	ListView listView1 = (ListView)findViewById(R.id.TaskList);
+            listView1.setAdapter(taskAdapter);
         }
     } 
 

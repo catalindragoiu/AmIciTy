@@ -34,13 +34,14 @@ public final class R {
         public static final int FileList=0x7f080006;
         public static final int ImgContainer=0x7f080004;
         public static final int TaskDetails=0x7f080003;
+        public static final int TaskList=0x7f080007;
         public static final int TextView01=0x7f080001;
         public static final int TextView02=0x7f080002;
-        public static final int action_accept=0x7f08000a;
-        public static final int action_attach=0x7f080009;
-        public static final int action_camera=0x7f080008;
-        public static final int action_new=0x7f080007;
-        public static final int action_settings=0x7f08000b;
+        public static final int action_accept=0x7f08000b;
+        public static final int action_attach=0x7f08000a;
+        public static final int action_camera=0x7f080009;
+        public static final int action_new=0x7f080008;
+        public static final int action_settings=0x7f08000c;
         public static final int container=0x7f080000;
     }
     public static final class layout {
@@ -51,6 +52,7 @@ public final class R {
         public static final int fragment_create_task=0x7f030004;
         public static final int fragment_file_picker=0x7f030005;
         public static final int fragment_home_screen=0x7f030006;
+        public static final int task_view=0x7f030007;
     }
     public static final class menu {
         public static final int action_bar_menu=0x7f070000;

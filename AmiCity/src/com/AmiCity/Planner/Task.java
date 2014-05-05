@@ -20,6 +20,17 @@ public class Task {
 		return m_imagePaths.add(Path);
 	}
 	
+	void SetDescription(String description)
+	{
+		m_taskDescription = description;
+	}
+	
+	String GetDescription()
+	{
+		return m_taskDescription;
+	}
+	
 	ArrayList<String> m_filePaths;
 	ArrayList<String> m_imagePaths;
+	String m_taskDescription;
 }

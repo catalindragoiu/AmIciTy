@@ -16,6 +16,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.os.Build;
@@ -78,12 +79,14 @@ public class CreateTaskActivity extends Activity {
 			{
 				newTask.AddNewFilePath(filePath);
 			}
+			EditText descriptionEditText = (EditText)findViewById(R.id.TaskDetails);
+			newTask.SetDescription(descriptionEditText.getText().toString());
 			Gson gson = new Gson();
-			String serialedTask = gson.toJson(newTask);
+			String serializedTask = gson.toJson(newTask);
 			/*TODO: Image Paths*/
 			
 			Intent databackIntent = new Intent(); 
-			databackIntent.putExtra("new_task", serialedTask); 
+			databackIntent.putExtra("new_task", serializedTask); 
 			setResult(Activity.RESULT_OK, databackIntent);
 			finish();
 			return true;
