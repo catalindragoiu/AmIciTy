@@ -1,12 +1,18 @@
 package com.AmiCity.Planner;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 
+import com.AmiCity.Planner.SwipeDismissListViewTouchListener.DismissCallbacks;
 import com.google.gson.Gson;
 
 import android.app.Activity;
 import android.app.ActionBar;
 import android.app.Fragment;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -23,12 +29,14 @@ import android.os.Build;
 public class HomeScreen extends Activity 
 {
 	private static final int REQUEST_NEW_TASK = 654;
-	ArrayList<Task> m_tasks;
+	private static final String SaveFile = "storage.dat";
+	
 	private TasksArrayAdapter taskAdapter;
+	TasksManager m_tasksManager = null;
     @Override
     protected void onCreate(Bundle savedInstanceState) 
     {
-    	m_tasks = new ArrayList<Task>();
+    	LoadState();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_screen);
 
@@ -49,10 +57,37 @@ public class HomeScreen extends Activity
     	inflater.inflate(R.menu.home_screen, menu);
         inflater.inflate(R.menu.action_bar_menu, menu);
         
-		final ListView listView1 = (ListView)findViewById(R.id.TaskList);
-		listView1.setClickable(true);
-		taskAdapter = new TasksArrayAdapter(this,R.layout.file_view,m_tasks);
-        listView1.setAdapter(taskAdapter);
+        if(m_tasksManager != null)
+        {
+			final ListView listView1 = (ListView)findViewById(R.id.TaskList);
+			listView1.setClickable(true);
+			taskAdapter = new TasksArrayAdapter(this,R.layout.file_view,m_tasksManager.GetTasks());
+	        listView1.setAdapter(taskAdapter);
+	        SwipeDismissListViewTouchListener touchListener =
+	        		 new SwipeDismissListViewTouchListener(
+	        				 listView1,
+	        				 new DismissCallbacks() {
+        					 		public void onDismiss(ListView listView, int[] reverseSortedPositions) 
+        					 		{
+						        		for (int position : reverseSortedPositions) 
+						        		{
+						        			Task taskToRemove = taskAdapter.getItem(position);
+						        			m_tasksManager.removeTask(taskToRemove);
+						        			taskAdapter.remove(taskToRemove);
+						        		}
+					        		 	taskAdapter.notifyDataSetChanged();
+					        		 	SaveState();
+					        		}
+
+					@Override
+					public boolean canDismiss(int position) {
+						// TODO Auto-generated method stub
+						return true;
+					}
+	        		 });
+	        		 listView1.setOnTouchListener(touchListener);
+	        		 listView1.setOnScrollListener(touchListener.makeScrollListener());
+        }
         return true;
     }
 
@@ -91,6 +126,51 @@ public class HomeScreen extends Activity
         }
     }
     
+    public void LoadState()
+    {
+    	try
+    	{
+	    	FileInputStream in = openFileInput(SaveFile);
+	        InputStreamReader inputStreamReader = new InputStreamReader(in);
+	        BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+	        StringBuilder sb = new StringBuilder();
+	        String line;
+	        while ((line = bufferedReader.readLine()) != null) {
+	            sb.append(line);
+	        }
+	        
+	        Gson deserializer = new Gson();
+	        m_tasksManager = deserializer.fromJson(sb.toString(), TasksManager.class);
+	        
+    	}
+    	catch(Exception e)
+    	{
+    		e.printStackTrace();
+    		/*We must create the instance if it was not created by deserialization*/
+    		if(m_tasksManager == null)
+    		{
+    			m_tasksManager = new TasksManager();
+    		}
+    	}
+    }
+    
+    public void SaveState()
+    {
+    	/*Save the serialized tasks*/
+    	Gson serializer = new Gson();
+    	String serializedData = serializer.toJson(m_tasksManager);
+    	
+    	FileOutputStream outputStream;
+		
+    	try {
+    	  outputStream = openFileOutput(SaveFile, Context.MODE_PRIVATE);
+    	  outputStream.write(serializedData.getBytes());
+    	  outputStream.close();
+    	} catch (Exception e) {
+    	  e.printStackTrace();
+    	}
+    }
+    
     public void StartNewTaskActivity()
     {
     	Intent intent = new Intent(this, CreateTaskActivity.class);
@@ -104,11 +184,13 @@ public class HomeScreen extends Activity
         	String serializedTask = (String)data.getExtras().get("new_task");
         	Gson gson = new Gson();
         	Task newTask = gson.fromJson(serializedTask, Task.class);
-        	m_tasks.add(newTask);
-        	taskAdapter = new TasksArrayAdapter(this,R.layout.file_view,m_tasks);
+        	m_tasksManager.addTask(newTask);
+        	taskAdapter = new TasksArrayAdapter(this,R.layout.file_view,m_tasksManager.GetTasks());
         	
         	ListView listView1 = (ListView)findViewById(R.id.TaskList);
             listView1.setAdapter(taskAdapter);
+            
+            SaveState();
         }
     } 
 
