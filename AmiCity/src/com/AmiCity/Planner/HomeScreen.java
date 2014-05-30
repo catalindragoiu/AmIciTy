@@ -61,7 +61,7 @@ public class HomeScreen extends Activity
         {
 			final ListView listView1 = (ListView)findViewById(R.id.TaskList);
 			listView1.setClickable(true);
-			taskAdapter = new TasksArrayAdapter(this,R.layout.file_view,m_tasksManager.GetTasks());
+			taskAdapter = new TasksArrayAdapter(this,R.layout.task_view,m_tasksManager.GetTasks());
 	        listView1.setAdapter(taskAdapter);
 	        SwipeDismissListViewTouchListener touchListener =
 	        		 new SwipeDismissListViewTouchListener(
@@ -185,7 +185,7 @@ public class HomeScreen extends Activity
         	Gson gson = new Gson();
         	Task newTask = gson.fromJson(serializedTask, Task.class);
         	m_tasksManager.addTask(newTask);
-        	taskAdapter = new TasksArrayAdapter(this,R.layout.file_view,m_tasksManager.GetTasks());
+        	taskAdapter = new TasksArrayAdapter(this,R.layout.task_view,m_tasksManager.GetTasks());
         	
         	ListView listView1 = (ListView)findViewById(R.id.TaskList);
             listView1.setAdapter(taskAdapter);

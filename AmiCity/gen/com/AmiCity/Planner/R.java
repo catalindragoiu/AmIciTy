@@ -22,26 +22,31 @@ public final class R {
         public static final int activity_vertical_margin=0x7f040001;
     }
     public static final class drawable {
-        public static final int ic_action_accept=0x7f020000;
-        public static final int ic_action_attachment=0x7f020001;
-        public static final int ic_action_camera=0x7f020002;
-        public static final int ic_action_new=0x7f020003;
-        public static final int ic_action_overflow=0x7f020004;
-        public static final int ic_launcher=0x7f020005;
+        public static final int green_ball=0x7f020000;
+        public static final int ic_action_accept=0x7f020001;
+        public static final int ic_action_attachment=0x7f020002;
+        public static final int ic_action_camera=0x7f020003;
+        public static final int ic_action_new=0x7f020004;
+        public static final int ic_action_overflow=0x7f020005;
+        public static final int ic_launcher=0x7f020006;
+        public static final int red_ball=0x7f020007;
+        public static final int yellow_ball=0x7f020008;
     }
     public static final class id {
+        public static final int AttachIcon=0x7f080009;
         public static final int AttachedFile=0x7f080005;
         public static final int FileList=0x7f080006;
         public static final int ImgContainer=0x7f080004;
+        public static final int PriorityImage=0x7f080008;
         public static final int TaskDetails=0x7f080003;
         public static final int TaskList=0x7f080007;
         public static final int TextView01=0x7f080001;
         public static final int TextView02=0x7f080002;
-        public static final int action_accept=0x7f08000b;
-        public static final int action_attach=0x7f08000a;
-        public static final int action_camera=0x7f080009;
-        public static final int action_new=0x7f080008;
-        public static final int action_settings=0x7f08000c;
+        public static final int action_accept=0x7f08000d;
+        public static final int action_attach=0x7f08000c;
+        public static final int action_camera=0x7f08000b;
+        public static final int action_new=0x7f08000a;
+        public static final int action_settings=0x7f08000e;
         public static final int container=0x7f080000;
     }
     public static final class layout {

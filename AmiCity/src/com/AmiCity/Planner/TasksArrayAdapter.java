@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 public class TasksArrayAdapter extends ArrayAdapter<Task>{
@@ -37,13 +38,31 @@ public class TasksArrayAdapter extends ArrayAdapter<Task>{
           final Task o = mItems.get(position);
           if (o != null) {
                   TextView t1 = (TextView) v.findViewById(R.id.TextView01);
-                  TextView t2 = (TextView) v.findViewById(R.id.TextView02);
-                  
+                  ImageView attachImage = (ImageView)v.findViewById(R.id.AttachIcon);
+                  ImageView listImage = (ImageView)v.findViewById(R.id.PriorityImage);
                   if(t1!=null && o.GetDescription().length() > 0)
                   	t1.setText(o.GetDescription());
-                  if(t2!=null && o.m_filePaths.size() > 0)
-                  	t2.setText(o.m_filePaths.get(0));
-                  
+                  if(attachImage!=null && o.GetFilePaths().size() > 0)
+                	  attachImage.setImageDrawable(mContext.getResources().getDrawable(R.drawable.ic_action_attachment));
+                  switch(o.GetPriority())
+                  {
+                  //lowest
+                  case 0:
+                  {
+                	  listImage.setImageDrawable(mContext.getResources().getDrawable(R.drawable.green_ball));
+                	  break;
+                  }
+                  case 1:
+                  {
+                	  listImage.setImageDrawable(mContext.getResources().getDrawable(R.drawable.yellow_ball));
+                	  break;
+                  }
+                  case 2:
+                  {
+                	  listImage.setImageDrawable(mContext.getResources().getDrawable(R.drawable.red_ball));
+                	  break;
+                  }
+                  }
           }
           return v;
 	 }
