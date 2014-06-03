@@ -46,6 +46,16 @@ public class CreateTaskActivity extends Activity {
 		inflater.inflate(R.menu.create_task, menu);
 		inflater.inflate(R.menu.action_bar_new_task, menu);
 		this.imageContainer = (ImageView)this.findViewById(R.id.ImgContainer);
+		Bundle extras = getIntent().getExtras();
+		if(extras != null)
+		{
+			String serializedTask = extras.getString("data");
+			Gson deserializer = new Gson();
+			Task taskToEdit = deserializer.fromJson(serializedTask, Task.class);
+			EditText descriptionEditText = (EditText)findViewById(R.id.TaskDetails);
+			descriptionEditText.setText(taskToEdit.GetDescription());
+			descriptionEditText.clearFocus();
+		}
 		return true;
 	}
 

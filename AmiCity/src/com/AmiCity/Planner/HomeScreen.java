@@ -1,6 +1,7 @@
 package com.AmiCity.Planner;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStreamReader;
@@ -22,6 +23,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.os.Build;
@@ -85,8 +87,24 @@ public class HomeScreen extends Activity
 						return true;
 					}
 	        		 });
-	        		 listView1.setOnTouchListener(touchListener);
-	        		 listView1.setOnScrollListener(touchListener.makeScrollListener());
+	        
+			listView1.setOnItemClickListener(
+					new AdapterView.OnItemClickListener() 
+					{
+						public void onItemClick(AdapterView<?> adapter,View view, int position, long arg3) 
+						{
+							// TODO Auto-generated method stub
+							//super.onListItemClick(l, v, position, id);
+							Task taskToExpand = (Task)listView1.getItemAtPosition(position);
+							Gson serializer = new Gson();
+							String serialzedTask = serializer.toJson(taskToExpand);
+							//TODO: Select file
+							StartNewTaskActivity(serialzedTask);
+							finish();
+						}
+					});
+    		 listView1.setOnTouchListener(touchListener);
+    		 listView1.setOnScrollListener(touchListener.makeScrollListener());
         }
         return true;
     }
@@ -104,7 +122,7 @@ public class HomeScreen extends Activity
         }
         if(id == R.id.action_new)
         {
-        	StartNewTaskActivity();
+        	StartNewTaskActivity("");
         }
         return super.onOptionsItemSelected(item);
     }
@@ -171,9 +189,13 @@ public class HomeScreen extends Activity
     	}
     }
     
-    public void StartNewTaskActivity()
+    public void StartNewTaskActivity(String dataToSend)
     {
     	Intent intent = new Intent(this, CreateTaskActivity.class);
+    	if(dataToSend.length() > 0)
+    	{
+    		intent.putExtra("data", dataToSend);
+    	}
     	startActivityForResult(intent,REQUEST_NEW_TASK);
     }
     
