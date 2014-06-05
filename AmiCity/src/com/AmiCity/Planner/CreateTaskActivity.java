@@ -1,7 +1,9 @@
 package com.AmiCity.Planner;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
+import com.origamilabs.library.views.StaggeredGridView;
 import com.google.gson.Gson;
 
 import android.app.Activity;
@@ -9,6 +11,7 @@ import android.app.ActionBar;
 import android.app.Fragment;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -45,7 +48,7 @@ public class CreateTaskActivity extends Activity {
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.create_task, menu);
 		inflater.inflate(R.menu.action_bar_new_task, menu);
-		this.imageContainer = (ImageView)this.findViewById(R.id.ImgContainer);
+		//this.imageContainer = (ImageView)this.findViewById(R.id.ImgContainer);
 		Bundle extras = getIntent().getExtras();
 		if(extras != null)
 		{
@@ -56,6 +59,25 @@ public class CreateTaskActivity extends Activity {
 			descriptionEditText.setText(taskToEdit.GetDescription());
 			descriptionEditText.clearFocus();
 		}
+		
+		StaggeredGridView gridView = (StaggeredGridView) this.findViewById(R.id.staggeredGridView1);
+		
+		gridView.setItemMargin(0); // set the GridView margin
+		
+		gridView.setPadding(0, 0, 0, 0); // have the margin on the sides as well 
+		
+		HashSet<Drawable> imageList = new HashSet<Drawable>();
+		imageList.add(getResources().getDrawable(R.drawable.ic_action_accept));
+		imageList.add(getResources().getDrawable(R.drawable.ic_action_attachment));
+		imageList.add(getResources().getDrawable(R.drawable.ic_action_camera));
+		imageList.add(getResources().getDrawable(R.drawable.ic_action_new));
+		
+		StaggeredAdapter adapter = new StaggeredAdapter
+				(this, R.id.imageView1, (Drawable[]) imageList.toArray(new Drawable[imageList.size()]));
+		
+		gridView.setAdapter(adapter);
+		adapter.notifyDataSetChanged();
+		
 		return true;
 	}
 

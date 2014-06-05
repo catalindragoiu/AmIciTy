@@ -9,6 +9,32 @@ package com.AmiCity.Planner;
 
 public final class R {
     public static final class attr {
+        /** <p>Must be a boolean value, either "<code>true</code>" or "<code>false</code>".
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.
+         */
+        public static final int drawSelectorOnTop=0x7f010000;
+        /** <p>Must be a dimension value, which is a floating point number appended with a unit such as "<code>14.5sp</code>".
+Available units are: px (pixels), dp (density-independent pixels), sp (scaled pixels based on preferred font size),
+in (inches), mm (millimeters).
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.
+         */
+        public static final int itemMargin=0x7f010002;
+        /** <p>Must be an integer value, such as "<code>100</code>".
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.
+         */
+        public static final int numColumns=0x7f010001;
     }
     public static final class dimen {
         /**  Default screen margins, per the Android Design guidelines. 
@@ -33,21 +59,22 @@ public final class R {
         public static final int yellow_ball=0x7f020008;
     }
     public static final class id {
-        public static final int AttachIcon=0x7f080009;
+        public static final int AttachIcon=0x7f08000a;
         public static final int AttachedFile=0x7f080005;
         public static final int FileList=0x7f080006;
-        public static final int ImgContainer=0x7f080004;
-        public static final int PriorityImage=0x7f080008;
+        public static final int PriorityImage=0x7f080009;
         public static final int TaskDetails=0x7f080003;
         public static final int TaskList=0x7f080007;
         public static final int TextView01=0x7f080001;
         public static final int TextView02=0x7f080002;
-        public static final int action_accept=0x7f08000d;
-        public static final int action_attach=0x7f08000c;
-        public static final int action_camera=0x7f08000b;
-        public static final int action_new=0x7f08000a;
-        public static final int action_settings=0x7f08000e;
+        public static final int action_accept=0x7f08000e;
+        public static final int action_attach=0x7f08000d;
+        public static final int action_camera=0x7f08000c;
+        public static final int action_new=0x7f08000b;
+        public static final int action_settings=0x7f08000f;
         public static final int container=0x7f080000;
+        public static final int imageView1=0x7f080008;
+        public static final int staggeredGridView1=0x7f080004;
     }
     public static final class layout {
         public static final int activity_create_task=0x7f030000;
@@ -57,7 +84,8 @@ public final class R {
         public static final int fragment_create_task=0x7f030004;
         public static final int fragment_file_picker=0x7f030005;
         public static final int fragment_home_screen=0x7f030006;
-        public static final int task_view=0x7f030007;
+        public static final int row_staggered_demo=0x7f030007;
+        public static final int task_view=0x7f030008;
     }
     public static final class menu {
         public static final int action_bar_menu=0x7f070000;
@@ -108,4 +136,67 @@ public final class R {
          */
         public static final int AppTheme=0x7f060001;
     }
+    public static final class styleable {
+        /** Attributes that can be used with a StaggeredGridView.
+           <p>Includes the following attributes:</p>
+           <table>
+           <colgroup align="left" />
+           <colgroup align="left" />
+           <tr><th>Attribute</th><th>Description</th></tr>
+           <tr><td><code>{@link #StaggeredGridView_drawSelectorOnTop com.AmiCity.Planner:drawSelectorOnTop}</code></td><td></td></tr>
+           <tr><td><code>{@link #StaggeredGridView_itemMargin com.AmiCity.Planner:itemMargin}</code></td><td></td></tr>
+           <tr><td><code>{@link #StaggeredGridView_numColumns com.AmiCity.Planner:numColumns}</code></td><td></td></tr>
+           </table>
+           @see #StaggeredGridView_drawSelectorOnTop
+           @see #StaggeredGridView_itemMargin
+           @see #StaggeredGridView_numColumns
+         */
+        public static final int[] StaggeredGridView = {
+            0x7f010000, 0x7f010001, 0x7f010002
+        };
+        /**
+          <p>This symbol is the offset where the {@link com.AmiCity.Planner.R.attr#drawSelectorOnTop}
+          attribute's value can be found in the {@link #StaggeredGridView} array.
+
+
+          <p>Must be a boolean value, either "<code>true</code>" or "<code>false</code>".
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.
+          @attr name com.AmiCity.Planner:drawSelectorOnTop
+        */
+        public static final int StaggeredGridView_drawSelectorOnTop = 0;
+        /**
+          <p>This symbol is the offset where the {@link com.AmiCity.Planner.R.attr#itemMargin}
+          attribute's value can be found in the {@link #StaggeredGridView} array.
+
+
+          <p>Must be a dimension value, which is a floating point number appended with a unit such as "<code>14.5sp</code>".
+Available units are: px (pixels), dp (density-independent pixels), sp (scaled pixels based on preferred font size),
+in (inches), mm (millimeters).
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.
+          @attr name com.AmiCity.Planner:itemMargin
+        */
+        public static final int StaggeredGridView_itemMargin = 2;
+        /**
+          <p>This symbol is the offset where the {@link com.AmiCity.Planner.R.attr#numColumns}
+          attribute's value can be found in the {@link #StaggeredGridView} array.
+
+
+          <p>Must be an integer value, such as "<code>100</code>".
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.
+          @attr name com.AmiCity.Planner:numColumns
+        */
+        public static final int StaggeredGridView_numColumns = 1;
+    };
 }
