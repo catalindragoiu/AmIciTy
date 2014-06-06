@@ -10,11 +10,11 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 
 
-public class StaggeredAdapter extends ArrayAdapter<Drawable> {
+public class StaggeredAdapter extends ArrayAdapter<TileItem> {
 
 
 	public StaggeredAdapter(Context context, int textViewResourceId,
-			Drawable[] objects) {
+			TileItem[] objects) {
 		super(context, textViewResourceId, objects);
 	}
 
@@ -31,7 +31,7 @@ public class StaggeredAdapter extends ArrayAdapter<Drawable> {
 			
 		}
 		ScaleImageView imageView = (ScaleImageView) convertView .findViewById(R.id.imageView1);
-		imageView.setImageDrawable(getItem(position));
+		imageView.setImageDrawable(getItem(position).GetDrawable());
 		return convertView;
 	}
 

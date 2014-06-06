@@ -27,13 +27,17 @@ import android.os.Build;
 public class CreateTaskActivity extends Activity {
 	private static final int REQUEST_TAKE_PHOTO = 755; 
 	private static final int REQUEST_ATTACH_FILE = 756;
-	private ArrayList<String> m_attachedFiles;
-	private ImageView imageContainer;
+	private Task m_task;
+	private ImageView m_imageContainer;
+	private EditText m_descriptionEditText;
+	HashSet<TileItem> m_tileList;
+	StaggeredGridView m_tileGridView;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		m_task = new Task();
+		m_tileList = new HashSet<TileItem>();
 		setContentView(R.layout.activity_create_task);
-		m_attachedFiles = new ArrayList<String>();
 		if (savedInstanceState == null) {
 			getFragmentManager().beginTransaction()
 					.add(R.id.container, new PlaceholderFragment()).commit();
@@ -48,35 +52,23 @@ public class CreateTaskActivity extends Activity {
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.create_task, menu);
 		inflater.inflate(R.menu.action_bar_new_task, menu);
+		m_descriptionEditText = (EditText)findViewById(R.id.TaskDetails);
 		//this.imageContainer = (ImageView)this.findViewById(R.id.ImgContainer);
 		Bundle extras = getIntent().getExtras();
+		
+		m_tileGridView = (StaggeredGridView) this.findViewById(R.id.staggeredGridView1);
+		m_tileGridView.setItemMargin(0); // set the GridView margin
+		m_tileGridView.setPadding(0, 0, 0, 0); // have the margin on the sides as well 
+		
 		if(extras != null)
 		{
 			String serializedTask = extras.getString("data");
 			Gson deserializer = new Gson();
-			Task taskToEdit = deserializer.fromJson(serializedTask, Task.class);
-			EditText descriptionEditText = (EditText)findViewById(R.id.TaskDetails);
-			descriptionEditText.setText(taskToEdit.GetDescription());
-			descriptionEditText.clearFocus();
+			m_task = deserializer.fromJson(serializedTask, Task.class);
+			LoadTaskDataToUI();
 		}
 		
-		StaggeredGridView gridView = (StaggeredGridView) this.findViewById(R.id.staggeredGridView1);
 		
-		gridView.setItemMargin(0); // set the GridView margin
-		
-		gridView.setPadding(0, 0, 0, 0); // have the margin on the sides as well 
-		
-		HashSet<Drawable> imageList = new HashSet<Drawable>();
-		imageList.add(getResources().getDrawable(R.drawable.ic_action_accept));
-		imageList.add(getResources().getDrawable(R.drawable.ic_action_attachment));
-		imageList.add(getResources().getDrawable(R.drawable.ic_action_camera));
-		imageList.add(getResources().getDrawable(R.drawable.ic_action_new));
-		
-		StaggeredAdapter adapter = new StaggeredAdapter
-				(this, R.id.imageView1, (Drawable[]) imageList.toArray(new Drawable[imageList.size()]));
-		
-		gridView.setAdapter(adapter);
-		adapter.notifyDataSetChanged();
 		
 		return true;
 	}
@@ -106,15 +98,10 @@ public class CreateTaskActivity extends Activity {
 		if (id == R.id.action_accept) 
 		{
 			/*Return the newly created task*/
-			Task newTask = new Task();
-			for(String filePath : m_attachedFiles)
-			{
-				newTask.AddNewFilePath(filePath);
-			}
 			EditText descriptionEditText = (EditText)findViewById(R.id.TaskDetails);
-			newTask.SetDescription(descriptionEditText.getText().toString());
+			m_task.SetDescription(descriptionEditText.getText().toString());
 			Gson gson = new Gson();
-			String serializedTask = gson.toJson(newTask);
+			String serializedTask = gson.toJson(m_task);
 			/*TODO: Image Paths*/
 			
 			Intent databackIntent = new Intent(); 
@@ -131,17 +118,36 @@ public class CreateTaskActivity extends Activity {
         if (requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK) 
         {  
             Bitmap photo = (Bitmap) data.getExtras().get("data"); 
-            this.imageContainer.setImageBitmap(photo);
+            this.m_imageContainer.setImageBitmap(photo);
         }
         if (requestCode == REQUEST_ATTACH_FILE && resultCode == RESULT_OK) 
         {  
         	String fileName = (String) data.getExtras().get("file_name"); 
         	/*Perhaps add another list here to allow the user to upload more files*/
-        	m_attachedFiles.add(fileName);
-        	TextView fileNameText = (TextView)this.findViewById(R.id.AttachedFile);
-        	fileNameText.setText(fileName);
+        	m_task.AddNewFilePath(fileName);
+        	LoadTaskDataToUI();
         }
-    } 
+    }
+	
+	private void LoadTaskDataToUI()
+	{
+		m_descriptionEditText.setText(m_task.GetDescription());
+		m_tileList.clear();
+		if(m_task.GetFilePaths().size() > 0)
+		{
+			for (String file : m_task.GetFilePaths()) 
+			{
+				m_tileList.add(new TileItem(getResources().getDrawable(R.drawable.ic_action_attachment), file));
+			}
+		}
+		
+		if(m_tileList.size() > 0)
+		{
+			StaggeredAdapter adapter = new StaggeredAdapter(this, R.id.imageView1, m_tileList.toArray(new TileItem[m_tileList.size()]));
+			m_tileGridView.setAdapter(adapter);
+			adapter.notifyDataSetChanged();	
+		}
+	}
 	/**
 	 * A placeholder fragment containing a simple view.
 	 */
