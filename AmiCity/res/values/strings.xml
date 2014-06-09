@@ -10,6 +10,7 @@
     <string name="DescriptionHint"> Add a description </string>
     <string name="Camera"> Camera </string>
     <string name="Accept"> Accept </string>
+    <string name="Contact"> Add Contact </string>
     <string name="Attach"> Add File</string>
     <string name="title_activity_file_picker">FilePicker</string>
     <string name="hello_world">Hello world!</string>

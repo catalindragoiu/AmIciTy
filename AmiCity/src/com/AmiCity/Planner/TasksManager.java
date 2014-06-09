@@ -1,6 +1,7 @@
 package com.AmiCity.Planner;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
 public class TasksManager {
 	private ArrayList<Task> m_tasks;

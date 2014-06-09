@@ -1,37 +1,60 @@
 package com.AmiCity.Planner;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 
 import com.origamilabs.library.views.StaggeredGridView;
+import com.origamilabs.library.views.StaggeredGridView.OnItemClickListener;
+import com.AmiCity.Planner.TileItem.TileType;
 import com.google.gson.Gson;
 
 import android.app.Activity;
 import android.app.ActionBar;
 import android.app.Fragment;
+import android.content.ContentUris;
 import android.content.Intent;
+import android.content.res.AssetFileDescriptor;
+import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.MimeTypeMap;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.os.Build;
+import android.provider.Contacts;
+import android.provider.ContactsContract;
+import android.provider.ContactsContract.PhoneLookup;
+import android.provider.MediaStore;
 
 public class CreateTaskActivity extends Activity {
 	private static final int REQUEST_TAKE_PHOTO = 755; 
 	private static final int REQUEST_ATTACH_FILE = 756;
+	private static final int REQUEST_PICK_CONTACT = 757;
 	private Task m_task;
 	private ImageView m_imageContainer;
 	private EditText m_descriptionEditText;
-	HashSet<TileItem> m_tileList;
-	StaggeredGridView m_tileGridView;
+	private HashSet<TileItem> m_tileList;
+	private StaggeredGridView m_tileGridView;
+	private String m_tempPhotoPath;
+	StaggeredAdapter m_staggeredAdapter;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -57,7 +80,7 @@ public class CreateTaskActivity extends Activity {
 		Bundle extras = getIntent().getExtras();
 		
 		m_tileGridView = (StaggeredGridView) this.findViewById(R.id.staggeredGridView1);
-		m_tileGridView.setItemMargin(0); // set the GridView margin
+		m_tileGridView.setItemMargin(20); // set the GridView margin
 		m_tileGridView.setPadding(0, 0, 0, 0); // have the margin on the sides as well 
 		
 		if(extras != null)
@@ -68,9 +91,88 @@ public class CreateTaskActivity extends Activity {
 			LoadTaskDataToUI();
 		}
 		
-		
-		
+		m_tileGridView.setOnItemClickListener(new OnItemClickListener() {
+			
+			@Override
+			public void onItemClick(StaggeredGridView parent, View view, int position,
+					long id) {
+				TileItem item = m_staggeredAdapter.getItem(position);
+				HadleTitleClick(item);
+				
+				
+				// TODO Auto-generated method stub
+				
+			}
+		});
 		return true;
+	}
+	
+	public void HadleTitleClick(TileItem item)
+	{
+		if(item.GetType() == TileType.FILE  || item.GetType() == TileType.PHOTO)
+		{
+			LaunchFileFromPath(item.GetText());
+		}
+		int contactID = -1;
+		if(item.GetType() == TileType.CONTACT)
+		{
+			try
+			{
+				contactID = Integer.parseInt(item.values.get("contact_id"));
+			}
+			catch(Exception e)
+			{
+				Toast.makeText(getApplicationContext(), "An error occured when launching the contact.", 4000).show();
+			}
+			if(contactID != -1)
+			{
+				LaunchContact(contactID);
+			}
+		}
+	}
+	
+	public void LaunchContact(int contactID)
+	{
+		Intent intent = new Intent(Intent.ACTION_VIEW);
+	    Uri uri = Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_URI, String.valueOf(contactID));
+	    intent.setData(uri);
+	    intent.setFlags(intent.FLAG_ACTIVITY_NEW_TASK);
+	    getApplicationContext().startActivity(intent);
+	}
+	
+	public void LaunchFileFromPath(String path)
+	{
+		MimeTypeMap myMime = MimeTypeMap.getSingleton();
+
+		Intent newIntent = new Intent(android.content.Intent.ACTION_VIEW);
+
+		String mimeType = myMime.getMimeTypeFromExtension(fileExt(path.toString()).substring(1));
+		newIntent.setDataAndType(Uri.fromFile(new File(path)),mimeType);
+		newIntent.setFlags(newIntent.FLAG_ACTIVITY_NEW_TASK);
+		try {
+			getApplicationContext().startActivity(newIntent);
+		} catch (android.content.ActivityNotFoundException e) {
+		    Toast.makeText(getApplicationContext(), "No handler for this type of file.", 4000).show();
+		}
+	}
+	
+	private String fileExt(String url) {
+	    if (url.indexOf("?")>-1) {
+	        url = url.substring(0,url.indexOf("?"));
+	    }
+	    if (url.lastIndexOf(".") == -1) {
+	        return null;
+	    } else {
+	        String ext = url.substring(url.lastIndexOf(".") );
+	        if (ext.indexOf("%")>-1) {
+	            ext = ext.substring(0,ext.indexOf("%"));
+	        }
+	        if (ext.indexOf("/")>-1) {
+	            ext = ext.substring(0,ext.indexOf("/"));
+	        }
+	        return ext.toLowerCase();
+
+	    }
 	}
 
 	@Override
@@ -79,6 +181,7 @@ public class CreateTaskActivity extends Activity {
 		// automatically handle clicks on the Home/Up button, so long
 		// as you specify a parent activity in AndroidManifest.xml.
 		int id = item.getItemId();
+		m_task.SetDescription(m_descriptionEditText.getText().toString());
 		if (id == R.id.action_settings) 
 		{
 			return true;
@@ -86,6 +189,14 @@ public class CreateTaskActivity extends Activity {
 		if (id == R.id.action_camera) 
 		{
 			Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE); 
+			
+			File photoFile = null;
+	        photoFile = createImageFile();
+	        // Continue only if the File was successfully created
+	        if (photoFile != null) 	
+	        {
+	        	cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT,Uri.fromFile(photoFile));
+	        }
             startActivityForResult(cameraIntent, REQUEST_TAKE_PHOTO); 
 			return true;
 		}
@@ -95,11 +206,14 @@ public class CreateTaskActivity extends Activity {
 	    	startActivityForResult(intent, REQUEST_ATTACH_FILE);
 			return true;
 		}
+		if (id == R.id.action_contact)
+		{
+			Intent intent = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
+			startActivityForResult(intent, REQUEST_PICK_CONTACT);
+		}
 		if (id == R.id.action_accept) 
 		{
 			/*Return the newly created task*/
-			EditText descriptionEditText = (EditText)findViewById(R.id.TaskDetails);
-			m_task.SetDescription(descriptionEditText.getText().toString());
 			Gson gson = new Gson();
 			String serializedTask = gson.toJson(m_task);
 			/*TODO: Image Paths*/
@@ -110,44 +224,89 @@ public class CreateTaskActivity extends Activity {
 			finish();
 			return true;
 		}
+		
 		return super.onOptionsItemSelected(item);
 	}
 
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) 
 	{  
         if (requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK) 
-        {  
-            Bitmap photo = (Bitmap) data.getExtras().get("data"); 
-            this.m_imageContainer.setImageBitmap(photo);
+        {   
+            m_task.AddImagePath(m_tempPhotoPath);
+            m_tempPhotoPath = "";
         }
         if (requestCode == REQUEST_ATTACH_FILE && resultCode == RESULT_OK) 
         {  
         	String fileName = (String) data.getExtras().get("file_name"); 
         	/*Perhaps add another list here to allow the user to upload more files*/
         	m_task.AddNewFilePath(fileName);
-        	LoadTaskDataToUI();
+        	
         }
+        if (requestCode == REQUEST_PICK_CONTACT && resultCode == RESULT_OK) 
+	    if (resultCode == Activity.RESULT_OK) {
+	        Uri contactData = data.getData();
+	        Cursor c =  getContentResolver().query(contactData, null, null, null, null);
+	        if (c.moveToFirst()) {
+	          int contactID = c.getInt(c.getColumnIndexOrThrow(PhoneLookup._ID));
+	          m_task.AddContact(contactID);
+	          // TODO Whatever you want to do with the selected contact name.
+	        }
+	    }
+        LoadTaskDataToUI();
     }
 	
 	private void LoadTaskDataToUI()
 	{
 		m_descriptionEditText.setText(m_task.GetDescription());
 		m_tileList.clear();
+		
+		if(m_task.GetContacts().size() > 0)
+		{
+			for (Integer contactID : m_task.GetContacts()) 
+			{
+				Drawable image = openDisplayPhoto(contactID);
+				if(image != null)
+				{
+					TileItem newContactTile = new TileItem(image, "Contact Name", TileItem.TileType.CONTACT);
+					newContactTile.values.put("contact_id", contactID.toString()); 
+					m_tileList.add(newContactTile);
+				}
+			}
+		}
+		
+		if(m_task.GetImagePaths().size() > 0)
+		{
+			for (String file : m_task.GetImagePaths()) 
+			{
+				Drawable image = GetDrawableFromPath(file,640,460);
+				m_tileList.add(new TileItem(image, file, TileItem.TileType.PHOTO));
+			}
+		}
 		if(m_task.GetFilePaths().size() > 0)
 		{
 			for (String file : m_task.GetFilePaths()) 
 			{
-				m_tileList.add(new TileItem(getResources().getDrawable(R.drawable.ic_action_attachment), file));
+				m_tileList.add(new TileItem(getResources().getDrawable(R.drawable.ic_file), file, TileItem.TileType.FILE));
 			}
 		}
 		
 		if(m_tileList.size() > 0)
 		{
 			StaggeredAdapter adapter = new StaggeredAdapter(this, R.id.imageView1, m_tileList.toArray(new TileItem[m_tileList.size()]));
+			m_staggeredAdapter = adapter;
 			m_tileGridView.setAdapter(adapter);
 			adapter.notifyDataSetChanged();	
 		}
 	}
+	
+	public Drawable openDisplayPhoto(long contactId) 
+	{
+		Uri uri = ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, contactId);
+		InputStream photo = ContactsContract.Contacts.openContactPhotoInputStream (getContentResolver(), uri, true);
+		if(photo == null)
+			return null;
+		return Drawable.createFromStream(photo, null);
+	 }
 	/**
 	 * A placeholder fragment containing a simple view.
 	 */
@@ -163,6 +322,49 @@ public class CreateTaskActivity extends Activity {
 					container, false);
 			return rootView;
 		}
+	}
+		private File createImageFile() {
+	    // Create an image file name
+	    String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+	    String imageFileName = "JPEG_" + timeStamp + "_";
+	    File storageDir = Environment.getExternalStoragePublicDirectory(
+	            Environment.DIRECTORY_PICTURES);
+	    File image = null;
+		try {
+			image = File.createTempFile(
+			    imageFileName,  /* prefix */
+			    ".jpg",         /* suffix */
+			    storageDir      /* directory */
+			);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	    // Save a file: path for use with ACTION_VIEW intents
+		m_tempPhotoPath = image.getAbsolutePath();
+	    return image;
+	}
+	
+	private BitmapDrawable GetDrawableFromPath(String filePath,final int targetW, final int targetH) {
+
+	    // Get the dimensions of the bitmap
+	    BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+	    bmOptions.inJustDecodeBounds = true;
+	    BitmapFactory.decodeFile(filePath, bmOptions);
+	    int photoW = bmOptions.outWidth;
+	    int photoH = bmOptions.outHeight;
+
+	    // Determine how much to scale down the image
+	    int scaleFactor = Math.min(photoW/targetW, photoH/targetH);
+
+	    // Decode the image file into a Bitmap sized to fill the View
+	    bmOptions.inJustDecodeBounds = false;
+	    bmOptions.inSampleSize = scaleFactor;
+	    bmOptions.inPurgeable = true;
+
+	    Bitmap bitmap = BitmapFactory.decodeFile(filePath, bmOptions);
+	    return new BitmapDrawable(getResources(),bitmap);
 	}
 
 }

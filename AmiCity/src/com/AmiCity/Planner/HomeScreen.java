@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.UUID;
 
 import com.AmiCity.Planner.SwipeDismissListViewTouchListener.DismissCallbacks;
 import com.google.gson.Gson;
@@ -100,7 +101,6 @@ public class HomeScreen extends Activity
 							String serialzedTask = serializer.toJson(taskToExpand);
 							//TODO: Select file
 							StartNewTaskActivity(serialzedTask);
-							finish();
 						}
 					});
     		 listView1.setOnTouchListener(touchListener);
@@ -206,6 +206,14 @@ public class HomeScreen extends Activity
         	String serializedTask = (String)data.getExtras().get("new_task");
         	Gson gson = new Gson();
         	Task newTask = gson.fromJson(serializedTask, Task.class);
+        	
+        	/*The UUID identifies a task even if it's data is changed*/
+        	if(newTask.GetUUID() == null)
+        	{
+        		newTask.SetUUID(UUID.randomUUID());
+        	}
+        	/*If there is an older version of this task we remove it, comprison is done on UUID*/
+        	m_tasksManager.removeTask(newTask);	
         	m_tasksManager.addTask(newTask);
         	taskAdapter = new TasksArrayAdapter(this,R.layout.task_view,m_tasksManager.GetTasks());
         	
