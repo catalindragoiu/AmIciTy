@@ -1,6 +1,7 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent" >
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
 
     <com.AmiCity.Planner.ScaleImageView
         android:id="@+id/imageView1"
@@ -14,5 +15,13 @@
         android:layout_height="wrap_content"
     	android:background="@drawable/rounded_edittext"
         android:hint="@string/DescriptionHint" />
+      
+      <TextView
+        android:id="@+id/Title"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:gravity="center" 
+        android:background="#07000000"
+        android:layout_below="@+id/imageView1"/>
 
-</FrameLayout>
+</RelativeLayout>

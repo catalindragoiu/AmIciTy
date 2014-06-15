@@ -5,7 +5,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashSet;
 
 import com.origamilabs.library.views.StaggeredGridView;
@@ -15,8 +17,18 @@ import com.google.gson.Gson;
 
 import android.app.Activity;
 import android.app.ActionBar;
+import android.app.AlarmManager;
+import android.app.DatePickerDialog;
+import android.app.DatePickerDialog.OnDateSetListener;
+import android.app.Dialog;
+import android.app.DialogFragment;
 import android.app.Fragment;
+import android.app.PendingIntent;
+import android.app.TimePickerDialog;
+import android.app.TimePickerDialog.OnTimeSetListener;
+import android.content.ContentResolver;
 import android.content.ContentUris;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
@@ -27,6 +39,8 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.v4.app.FragmentActivity;
+import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -34,9 +48,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.MimeTypeMap;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.TimePicker;
 import android.widget.Toast;
 import android.os.Build;
 import android.provider.Contacts;
@@ -44,7 +60,7 @@ import android.provider.ContactsContract;
 import android.provider.ContactsContract.PhoneLookup;
 import android.provider.MediaStore;
 
-public class CreateTaskActivity extends Activity {
+public class CreateTaskActivity extends FragmentActivity implements OnDateSetListener,OnTimeSetListener{
 	private static final int REQUEST_TAKE_PHOTO = 755; 
 	private static final int REQUEST_ATTACH_FILE = 756;
 	private static final int REQUEST_PICK_CONTACT = 757;
@@ -55,6 +71,7 @@ public class CreateTaskActivity extends Activity {
 	private StaggeredGridView m_tileGridView;
 	private String m_tempPhotoPath;
 	StaggeredAdapter m_staggeredAdapter;
+	private GregorianCalendar m_newNotification;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -211,6 +228,17 @@ public class CreateTaskActivity extends Activity {
 			Intent intent = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
 			startActivityForResult(intent, REQUEST_PICK_CONTACT);
 		}
+		if (id == R.id.action_alarm)
+		{
+			Bundle b = new Bundle();
+			Calendar calendar = Calendar.getInstance();
+			b.putInt(DatePickerDialogFragment.YEAR, calendar.get(Calendar.YEAR) );
+			b.putInt(DatePickerDialogFragment.MONTH, calendar.get(Calendar.MONTH));
+			b.putInt(DatePickerDialogFragment.DATE, calendar.get(Calendar.DAY_OF_MONTH));
+			DatePickerDialogFragment picker = new DatePickerDialogFragment();
+			picker.setArguments(b);
+			picker.show(getSupportFragmentManager(), "fragment_date_picker");
+		}
 		if (id == R.id.action_accept) 
 		{
 			/*Return the newly created task*/
@@ -265,9 +293,13 @@ public class CreateTaskActivity extends Activity {
 			for (Integer contactID : m_task.GetContacts()) 
 			{
 				Drawable image = openDisplayPhoto(contactID);
+				if(image == null)
+				{
+					image = getResources().getDrawable(R.drawable.ic_person);
+				}
 				if(image != null)
 				{
-					TileItem newContactTile = new TileItem(image, "Contact Name", TileItem.TileType.CONTACT);
+					TileItem newContactTile = new TileItem(image, GetContactNameFromID(contactID), TileItem.TileType.CONTACT);
 					newContactTile.values.put("contact_id", contactID.toString()); 
 					m_tileList.add(newContactTile);
 				}
@@ -290,6 +322,16 @@ public class CreateTaskActivity extends Activity {
 			}
 		}
 		
+		if(m_task.GetNotifications().size() > 0)
+		{
+			for (GregorianCalendar calendar : m_task.GetNotifications()) 
+			{
+				SimpleDateFormat date_format = new SimpleDateFormat("MMM dd,yyyy HH:mm");
+			    Date resultdate = calendar.getTime();
+				m_tileList.add(new TileItem(getResources().getDrawable(R.drawable.ic_clock),date_format.format(resultdate) , TileItem.TileType.NOTIFICATION));
+			}
+		}
+		
 		if(m_tileList.size() > 0)
 		{
 			StaggeredAdapter adapter = new StaggeredAdapter(this, R.id.imageView1, m_tileList.toArray(new TileItem[m_tileList.size()]));
@@ -307,6 +349,23 @@ public class CreateTaskActivity extends Activity {
 			return null;
 		return Drawable.createFromStream(photo, null);
 	 }
+	
+	public String GetContactNameFromID(int contactId)
+	{
+		String contactName = "";
+		Uri contactUri = ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, contactId);
+		ContentResolver cr = getContentResolver();
+        Cursor cursor = cr.query(contactUri,
+               null, null, null, null);
+        if (cursor == null) {
+            return "";
+        }
+        if (cursor.moveToFirst()) {
+        	contactName = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
+        }
+        return contactName;
+	}
+	
 	/**
 	 * A placeholder fragment containing a simple view.
 	 */
@@ -366,5 +425,54 @@ public class CreateTaskActivity extends Activity {
 	    Bitmap bitmap = BitmapFactory.decodeFile(filePath, bmOptions);
 	    return new BitmapDrawable(getResources(),bitmap);
 	}
+
+	@Override
+	public void onDateSet(DatePicker view, int year, int monthOfYear,
+			int dayOfMonth) {
+		m_newNotification = new GregorianCalendar(year, monthOfYear, dayOfMonth);
+		
+		Calendar cal = Calendar.getInstance();
+	    int hour = cal.get(Calendar.HOUR_OF_DAY);
+	    int minute = cal.get(Calendar.MINUTE);
+
+
+	    Bundle b = new Bundle();
+	    b.putInt(TimePickerDialogFragment.HOUR, hour);
+	    b.putInt(TimePickerDialogFragment.MINUTE, minute);
+
+	    TimePickerDialogFragment picker = new TimePickerDialogFragment();
+	    picker.setArguments(b);
+	    picker.show(getSupportFragmentManager(), "frag_time_picker");
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+		// TODO Auto-generated method stub
+		m_newNotification.set(Calendar.HOUR_OF_DAY, hourOfDay);
+		m_newNotification.set(Calendar.MINUTE, minute);
+		createScheduledNotification(m_newNotification,m_task.GetDescription());
+		m_task.AddNewNotification(m_newNotification);
+		LoadTaskDataToUI();
+	}
+	
+	private void createScheduledNotification(GregorianCalendar calendar,String text)
+	 {
+	 getBaseContext();
+	// Retrieve alarm manager from the system
+	 AlarmManager alarmManager = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
+	 // Every scheduled intent needs a different ID, else it is just executed once
+	 int id = (int) System.currentTimeMillis();
+
+	 // Prepare the intent which should be launched at the date
+	 Intent intent = new Intent(this, AmiCityAlarmReceiver.class);
+	 intent.putExtra("description", text);
+	 // Prepare the pending intent
+	 PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), id, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+	 // Register the alert in the system. You have the option to define if the device has to wake up on the alert or not
+	 alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
+	 }
 
 }

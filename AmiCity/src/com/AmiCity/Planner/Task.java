@@ -1,6 +1,8 @@
 package com.AmiCity.Planner;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.UUID;
 
 import android.R.integer;
@@ -10,6 +12,7 @@ public class Task {
 	private ArrayList<String> m_imagePaths;
 	private ArrayList<String> m_messages;
 	private ArrayList<Integer> m_contactIDs;
+	private ArrayList<GregorianCalendar > m_notifications;
 	private String m_taskDescription;
 	int m_priority;
 	private UUID m_uuid;
@@ -20,7 +23,18 @@ public class Task {
 		m_filePaths = new ArrayList<String>();
 		m_imagePaths = new ArrayList<String>();
 		m_contactIDs = new ArrayList<Integer>();
+		m_notifications = new ArrayList<GregorianCalendar>();
 		m_priority = 1;
+	}
+	
+	public boolean AddNewNotification(GregorianCalendar calendar)
+	{
+		return m_notifications.add(calendar);
+	}
+	
+	public ArrayList<GregorianCalendar> GetNotifications()
+	{
+		return m_notifications;
 	}
 	
 	public boolean AddNewFilePath(String Path)
@@ -63,7 +77,7 @@ public class Task {
 		m_contactIDs.add(ContactID);
 	}
 	
-	String GetFileNameFromPath(String fullPath)
+	static String GetFileNameFromPath(String fullPath)
 	{
 		String[] splitPath = fullPath.split("/");
 		return splitPath[splitPath.length -1];

@@ -41,7 +41,7 @@ public class TileItem {
 	}
 	
 	public enum TileType {
-	    PHOTO, FILE, MESSAGE,CONTACT
+	    PHOTO, FILE, MESSAGE,CONTACT,NOTIFICATION
 	}
 }
 
