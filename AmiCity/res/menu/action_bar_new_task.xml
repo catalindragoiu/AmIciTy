@@ -25,6 +25,11 @@
           android:icon="@drawable/ic_action_add_person"
           android:title="@string/Contact"
           android:showAsAction="ifRoom" />
+     
+     <item android:id="@+id/action_share"
+          android:icon="@drawable/ic_action_share"
+          android:title="@string/ShareViaEmail"
+          android:showAsAction="ifRoom" />
     
     <!-- Settings, should always be in the overflow 
     <item android:id="@+id/ic_action_overflow"

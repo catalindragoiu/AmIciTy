@@ -252,6 +252,13 @@ public class CreateTaskActivity extends FragmentActivity implements OnDateSetLis
 			finish();
 			return true;
 		}
+		if (id == R.id.action_share) 
+		{
+			TaskShareManager shareMnr = new TaskShareManager(getApplicationContext());
+			shareMnr.ShareTaskByEmail(m_task);
+			return true;
+		}
+		
 		
 		return super.onOptionsItemSelected(item);
 	}

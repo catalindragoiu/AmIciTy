@@ -18,6 +18,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.os.Environment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -39,6 +41,7 @@ public class HomeScreen extends Activity
     @Override
     protected void onCreate(Bundle savedInstanceState) 
     {
+    	CreateAplicationExternalDirectory();
     	LoadState();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_screen);
@@ -223,5 +226,14 @@ public class HomeScreen extends Activity
             SaveState();
         }
     } 
+    
+    private void CreateAplicationExternalDirectory()
+    {
+    	File myFolder = new File( Environment.getExternalStorageDirectory() +  "/AmiCity");
+
+    	if(!myFolder.exists() ){
+    		myFolder.mkdir();
+    	}
+    }
 
 }
