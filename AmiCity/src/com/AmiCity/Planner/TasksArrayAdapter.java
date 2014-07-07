@@ -40,7 +40,7 @@ public class TasksArrayAdapter extends ArrayAdapter<Task>{
                   TextView t1 = (TextView) v.findViewById(R.id.TextView01);
                   ImageView attachImage = (ImageView)v.findViewById(R.id.AttachIcon);
                   ImageView listImage = (ImageView)v.findViewById(R.id.PriorityImage);
-                  if(t1!=null && o.GetDescription().length() > 0)
+                  if(t1!=null && o.GetDescription() != null && o.GetDescription().length() > 0)
                   	t1.setText(o.GetDescription());
                   if(attachImage!=null && o.GetFilePaths().size() > 0)
                 	  attachImage.setImageDrawable(mContext.getResources().getDrawable(R.drawable.ic_action_attachment));

@@ -17,6 +17,7 @@ import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
@@ -50,6 +51,34 @@ public class HomeScreen extends Activity
             getFragmentManager().beginTransaction()
                     .add(R.id.container, new PlaceholderFragment())
                     .commit();
+        }
+        
+        final Intent intent = getIntent();
+
+        final String action = intent.getAction();
+
+        if(Intent.ACTION_VIEW.equals(action)){
+        	Uri fileUri = intent.getData();
+            if (fileUri != null) {
+            	File arhiveFile = new File(fileUri.getPath());
+            	/*Check if the task has already been imported*/
+            	for(Task task : m_tasksManager.GetTasks())
+            	{
+            		if(task.ImportedFrom.equals(arhiveFile.getPath()))
+            			return;
+            			
+            	}
+            	
+            	TaskShareManager receiver = new TaskShareManager(getApplicationContext());
+            	Task newTask = receiver.LoadTaskFromArhive(arhiveFile);
+            	newTask.ImportedFrom = arhiveFile.getPath();
+            	
+            	/*Open the newly imported task*/
+            	Gson serializer = new Gson();
+				String serialzedTask = serializer.toJson(newTask);
+				//TODO: Select file
+				StartNewTaskActivity(serialzedTask);
+            }   
         }
     }
 

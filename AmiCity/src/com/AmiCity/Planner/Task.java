@@ -17,9 +17,14 @@ public class Task {
 	int m_priority;
 	private UUID m_uuid;
 	
+	/*The archieve from which the task was imported*/
+	public String ImportedFrom;
 	
 	public Task()
 	{
+		ImportedFrom = "";
+		m_uuid = null;
+		m_taskDescription = "";
 		m_filePaths = new ArrayList<String>();
 		m_imagePaths = new ArrayList<String>();
 		m_contactIDs = new ArrayList<Integer>();
@@ -103,13 +108,16 @@ public class Task {
 		return m_uuid;
 		
 	}
-	
 	public boolean equals(Object obj) 
 	{
 		if (!(obj instanceof Task))
             return false;
 		
-		return this.GetUUID().compareTo(((Task)obj).GetUUID()) == 0;
+		/*extra check for error case*/
+		if(((Task) obj).GetUUID() == null || m_uuid == null)
+			return true;
+		
+		return this.GetUUID().compareTo(((Task) obj).GetUUID()) == 0;
 	}
 	
 }

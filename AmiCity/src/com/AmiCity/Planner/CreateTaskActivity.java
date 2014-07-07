@@ -115,14 +115,10 @@ public class CreateTaskActivity extends FragmentActivity implements OnDateSetLis
 					long id) {
 				TileItem item = m_staggeredAdapter.getItem(position);
 				HadleTitleClick(item);
-				
-				
-				// TODO Auto-generated method stub
-				
 			}
 		});
 		return true;
-	}
+		}
 	
 	public void HadleTitleClick(TileItem item)
 	{

@@ -1,14 +1,19 @@
 package com.AmiCity.Planner;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.util.GregorianCalendar;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 import com.google.gson.Gson;
@@ -21,7 +26,6 @@ import android.provider.MediaStore.Files;
 import android.widget.Toast;
 
 public class TaskShareManager {
-	private Task m_taskToShare;
 	Context m_context;
 	
 	TaskShareManager(Context context)
@@ -37,27 +41,92 @@ public class TaskShareManager {
 		String emailtext = taskToShare.GetDescription();
 		Intent emailIntent = new Intent(android.content.Intent.ACTION_SEND);
 		/*Add email data*/
-		emailIntent.setType("plain/text");
+		emailIntent.setType("application/zip");
 		emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, subject);
 		emailIntent.putExtra(Intent.EXTRA_STREAM,Uri.parse("file://" + arhivePath));
 		emailIntent.putExtra(android.content.Intent.EXTRA_TEXT, emailtext);
 		/*Start email Activity*/
 		emailIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		Intent chooseIntent = Intent.createChooser(emailIntent, "Send Task");
+		chooseIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		try
 		{
-			m_context.startActivity(emailIntent);		
+			m_context.startActivity(chooseIntent);		
 		} 
 		catch (Throwable t) 
 		{
 			Toast.makeText(m_context, "Request failed: " + t.toString(), Toast.LENGTH_LONG).show();
 		}
 	}
+	
+	public Task LoadTaskFromArhive(File arhiveFile)
+	{
+		/*TODO: Create task folder*/
+		File importFolder = new File( Environment.getExternalStorageDirectory() +  "/AmiCity/import_" + System.currentTimeMillis());
+
+    	if(!importFolder.exists() ){
+    		importFolder.mkdir();
+    	}
+		Task receivedTask = null;
+		Task newTask = new Task();
+		ZipInputStream zis;
+		InputStream is;
+		try {
+			is = new FileInputStream(arhiveFile);
+			zis = new ZipInputStream(new BufferedInputStream(is));
+			
+			ZipEntry ze;
+		     while ((ze = zis.getNextEntry()) != null) {
+		         ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		         byte[] buffer = new byte[1024];
+		         int count;
+		         while ((count = zis.read(buffer)) != -1) {
+		             baos.write(buffer, 0, count);
+		         }
+		         String filename = ze.getName();
+		         byte[] bytes = baos.toByteArray();
+		         if(filename.equals("SerializedTask"))
+		         {
+		        	 String serializedTaskString = new String(bytes);
+		        	 Gson deserializer = new Gson();
+		        	 receivedTask = deserializer.fromJson(serializedTaskString, Task.class);
+		        	 newTask.SetDescription(receivedTask.GetDescription());
+		        	 newTask.SetUUID(receivedTask.GetUUID());
+		        	 /* Add full path files*/
+
+		        	 for(String path : receivedTask.GetFilePaths())
+		 		     {
+		        		 newTask.AddNewFilePath(importFolder.getPath() + "/" + path);
+		 		     }
+		 		     for(String path : receivedTask.GetImagePaths())
+		 		     {
+		 		    	newTask.AddImagePath(importFolder.getPath() + "/" + path);
+		 		     }
+		         }
+		         else
+		         {
+		        	 /*Write each file to the folder*/
+		        	 FileOutputStream os = new FileOutputStream(importFolder.getPath() + "/" + filename);
+		        	 os.write(bytes);
+		         }
+		     }
+	    zis.close();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return newTask;
+	}
 	/*We parse the task and add its serialization and dependencies to a zip arhive 
 	 Returns the arhive path*/
 	private String CreateTaskArhive(Task taskToArhive)
 	{
 		ZipOutputStream zos = null;
-		String filename = Environment.getExternalStorageDirectory().getPath() + "/AmiCity/" + "task_" + System.currentTimeMillis();
+		String filename = Environment.getExternalStorageDirectory().getPath() + "/AmiCity/" + "task_" + System.currentTimeMillis() + ".amy";
 		try {
 			File outputTaskFile = new File(filename);
 			OutputStream os = new FileOutputStream(outputTaskFile);
@@ -94,16 +163,17 @@ public class TaskShareManager {
 	
 	private File CreateTaskMainFile(Task task)
 	{
-		File taskFile = new File(m_context.getFilesDir().getPath() + "/TempTask");
+		File taskFile = new File(m_context.getFilesDir().getPath() + "/SerializedTask");
 		/*We must save without the full paths*/
 		Task taskToSave = new Task();
+		taskToSave.SetDescription(task.GetDescription());
 		for(String path : task.GetFilePaths())
 		{
 			taskToSave.AddNewFilePath(Task.GetFileNameFromPath(path));
 		}
 		for(String path : task.GetImagePaths())
 		{
-			taskToSave.AddNewFilePath(Task.GetFileNameFromPath(path));
+			taskToSave.AddImagePath(Task.GetFileNameFromPath(path));
 		}
 		for(GregorianCalendar calendar : task.GetNotifications())
 		{
